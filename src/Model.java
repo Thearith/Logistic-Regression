@@ -7,13 +7,13 @@ import java.util.Set;
 public class Model {
 	
 	private String keyWord;
-	private HashMap<String, CountAndWeight> surroundingWords;
-	private HashMap<Collocation, CountAndWeight> collocations;
+	private HashMap<String, Double> surroundingWords;
+	private HashMap<Collocation, Double> collocations;
 	
 	public Model(String keyword) {
 		setKeyWord(keyword);
-		surroundingWords = new HashMap<String, CountAndWeight>();
-		collocations = new HashMap<Collocation, CountAndWeight>();
+		surroundingWords = new HashMap<String, Double>();
+		collocations = new HashMap<Collocation, Double>();
 	}
 	
 	public void setKeyWord(String keyWord) {
@@ -24,40 +24,72 @@ public class Model {
 		return this.keyWord;
 	}
 	
+	
+	/*
+	 * Surrounding words
+	 * */
+	
 	public void addWord(String word) {
-		CountAndWeight obj = getWordCountAndWeight(word);
-		obj.count++;
-		surroundingWords.put(word, obj);
+		double weight = getWordWeight(word);
+		surroundingWords.put(word, weight);
 	}
 	
-	public CountAndWeight getWordCountAndWeight(String word) {
-		return surroundingWords.containsKey(word) ? 
-				surroundingWords.get(word) : new CountAndWeight(0);
+	public void changeWordWeight(String word, double weight) {
+		surroundingWords.put(word,  weight);
 	}
+	
+	public double getWordWeight(String word) {
+		return surroundingWords.containsKey(word) ? 
+				surroundingWords.get(word) : getRandomizedWeight();
+	}
+	
+	
+	/*
+	 * Collocation 
+	 * */
 	
 	public void addCollocation(String word1, String word2) {
 		Collocation collocation = new Collocation(word1, word2);
-		CountAndWeight obj = getCollocationCountAndWeight(collocation);
-		obj.count++;
-		collocations.put(collocation, obj);
+		double weight = getCollocationWeight(collocation);
+		collocations.put(collocation, weight);
 	}
 	
-	public CountAndWeight getCollocationCountAndWeight(Collocation collocation) {
+	public void changeCollocationWeight(String word1, String word2, double weight) {
+		Collocation collocation = new Collocation(word1, word2);
+		collocations.put(collocation, weight);
+	}
+	
+	public void changeCollocationWeight(Collocation collocation, double weight) {
+		collocations.put(collocation, weight);
+	}
+	
+	public double getCollocationWeight(Collocation collocation) {
 		return collocations.containsKey(collocation) ?
-				collocations.get(collocation) : new CountAndWeight(0);
+				collocations.get(collocation) : getRandomizedWeight();
+	}
+	
+	
+	/*
+	 * Helper function
+	 * */
+	
+	private double getRandomizedWeight() {
+		return Math.random();
 	}
 	
 	public void printModel() {
 		System.out.println("------------------------------");
 		System.out.println("Keyword: " + keyWord);
-	
-		Set set = surroundingWords.entrySet();
-		Iterator i = set.iterator();
-
-		while(i.hasNext()) {
-			Map.Entry me = (Map.Entry) i.next();
-			System.out.print(me.getKey() + ": ");
-			System.out.println(me.getValue());
+		
+		Set<String> wordSet = surroundingWords.keySet();
+		for(String word : wordSet) {
+			System.out.println(word + ": " + surroundingWords.get(word));
+		}
+		
+		Set<Collocation> collocationSet = collocations.keySet();
+		for(Collocation collocation : collocationSet) {
+			System.out.println(collocation.word1 + " " + collocation.word2 + 
+					": " + surroundingWords.get(collocation));
 		}
 		
 		System.out.println("\n\n\n\n\n");
