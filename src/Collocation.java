@@ -26,8 +26,8 @@ public class Collocation {
 
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
-		return super.hashCode();
+		String word = word1 + " " + word2;
+		return word.hashCode();
 	}
 
 	@Override

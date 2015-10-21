@@ -5,8 +5,8 @@ import java.util.Set;
 public class sctrain {
 	
 	private static final int COLLOCATION_RANGE = 5;
-	private static final int NUM_ITERATIONS = 1000000; 
-	private static final double LEARNING_RATE = 0.001;
+	private static final int NUM_ITERATIONS = 100000; 
+	private static final double LEARNING_RATE = 1/(double) NUM_ITERATIONS;
 	
 	private static Model model1;
 	private static Model model2;
@@ -45,8 +45,12 @@ public class sctrain {
 		System.out.println("This program takes " + (System.currentTimeMillis() - time) + " milliseconds");
 		
 		// write models to text files
-		model1.printModel();
-		model2.printModel();
+		ArrayList<String> modelLogs = model1.getModelLogs();
+		modelLogs.addAll(model2.getModelLogs());
+		FileReaderWriter.writeToFile(modelFileName, modelLogs);
+		
+		for(String log : modelLogs)
+			System.out.println(log);
 		
 	}
 	
@@ -57,13 +61,13 @@ public class sctrain {
 	
 	private static void parseSentences(ArrayList<String> lines, ArrayList<String> stopWords) {
 		try {
-			
+			int index = 0;
 			for(String line : lines) {
 				parseSentence(line, stopWords);
 			}
 			
 		} catch(Exception e) {
-			System.err.println(e.getMessage());
+			System.err.println("Parse sentence: " + e.getMessage());
 		}
 	}
 	
@@ -74,7 +78,7 @@ public class sctrain {
 		// extract sentence id
 		String[] split1 = line.split("\t");
 		if(split1.length != 2) {
-			throw new Exception("The sentence does not contain \t, " + line);
+			throw new Exception("The sentence does not contain /t, " + line);
 		}
 		
 		// extract keyword
@@ -105,7 +109,7 @@ public class sctrain {
 			if(pos < 0 || relativePos == -1 || relativePos == 0)
 				continue;
 			
-			if(pos == words.length-1)
+			if(pos >= words.length-1)
 				break;
 			
 			String word1 = words[pos];
@@ -128,6 +132,7 @@ public class sctrain {
 	private static void trainModel() {
 		try{
 			for(int iteration = 0; iteration < NUM_ITERATIONS; iteration++) {
+				System.out.println("Processing iteration " + iteration);
 				for(Sentence sentence : sentences) {
 					double logisticRegressionVal = getLogisticRegression(sentence);
 					double expectedOutput = sentence.getOutput();
@@ -153,7 +158,7 @@ public class sctrain {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			System.err.println("Train: " + e.getMessage());
 		}
 	}
 	
@@ -184,7 +189,7 @@ public class sctrain {
 	}
 	
 	private static double sigmoid(double z) {
-		return 1/(1+Math.exp(z));
+		return 1/(1+Math.exp(-z));
 	}
 	
 	

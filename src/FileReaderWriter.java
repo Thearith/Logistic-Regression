@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -37,5 +39,27 @@ public class FileReaderWriter {
 			}
 		}
 		return lines;
+	}
+	
+	public static void writeToFile(String fileName, ArrayList<String> logs) {
+		BufferedWriter bufferedWriter = null;
+		
+		try {
+			bufferedWriter = new BufferedWriter(new FileWriter(fileName));
+			for(String log : logs)
+				bufferedWriter.write(log + "\n");
+			
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if(bufferedWriter != null) {
+					bufferedWriter.close();
+				}
+				
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+			}
+		}
 	}
 }

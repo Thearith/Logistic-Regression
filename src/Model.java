@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -5,6 +6,8 @@ import java.util.Set;
 
 
 public class Model {
+	
+	protected static final String KEYWORD = "Keyword";
 	
 	private String keyWord;
 	private HashMap<String, Double> surroundingWords;
@@ -34,6 +37,10 @@ public class Model {
 		surroundingWords.put(word, weight);
 	}
 	
+	public void addWord(String word, double weight) {
+		changeWordWeight(word, weight);
+	}
+	
 	public void changeWordWeight(String word, double weight) {
 		surroundingWords.put(word,  weight);
 	}
@@ -41,6 +48,11 @@ public class Model {
 	public double getWordWeight(String word) {
 		return surroundingWords.containsKey(word) ? 
 				surroundingWords.get(word) : getRandomizedWeight();
+	}
+	
+	public double getWordWeight(String word, double defaultValue) {
+		return surroundingWords.containsKey(word) ? 
+				surroundingWords.get(word) : defaultValue;
 	}
 	
 	
@@ -52,6 +64,10 @@ public class Model {
 		Collocation collocation = new Collocation(word1, word2);
 		double weight = getCollocationWeight(collocation);
 		collocations.put(collocation, weight);
+	}
+	
+	public void addCollocation(String word1, String word2, double weight) {
+		changeCollocationWeight(word1, word2, weight);
 	}
 	
 	public void changeCollocationWeight(String word1, String word2, double weight) {
@@ -68,6 +84,11 @@ public class Model {
 				collocations.get(collocation) : getRandomizedWeight();
 	}
 	
+	public double getCollocationWeight(Collocation collocation, double defaultValue) {
+		return collocations.containsKey(collocation) ?
+				collocations.get(collocation) : defaultValue;
+	}
+	
 	
 	/*
 	 * Helper function
@@ -78,20 +99,30 @@ public class Model {
 	}
 	
 	public void printModel() {
-		System.out.println("------------------------------");
-		System.out.println("Keyword: " + keyWord);
+		ArrayList<String> logs = getModelLogs();
+		for(String log : logs)
+			System.out.println(log);
+	}
+	
+	public ArrayList<String> getModelLogs() {
+		ArrayList<String> logs = new ArrayList<String>(); 
+		
+		String log = KEYWORD + " " + keyWord;
+		logs.add(log);
 		
 		Set<String> wordSet = surroundingWords.keySet();
 		for(String word : wordSet) {
-			System.out.println(word + ": " + surroundingWords.get(word));
+			log = word + " " + surroundingWords.get(word);
+			logs.add(log);
 		}
 		
 		Set<Collocation> collocationSet = collocations.keySet();
 		for(Collocation collocation : collocationSet) {
-			System.out.println(collocation.word1 + " " + collocation.word2 + 
-					": " + surroundingWords.get(collocation));
+			log = collocation.word1 + "," + collocation.word2 + 
+					" " + collocations.get(collocation);
+			logs.add(log);
 		}
 		
-		System.out.println("\n\n\n\n\n");
+		return logs;
 	}
 }
