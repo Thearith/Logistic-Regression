@@ -8,8 +8,9 @@ public class sctest {
 	private static final String TEST_KEYWORD = "QWERTYUIO"; // keyword just to make sure the word does not make sense and won't be confused with test words
 	private static final int COLLOCATION_RANGE = 5;
 	
-	private static Model model1;
-	private static Model model2;
+	private static TrainingModel model;
+	private static String keyWord1;
+	private static String keyWord2;
 	private static String testFileName;
 	private static String modelFileName;
 	private static String answerFileName;
@@ -25,16 +26,15 @@ public class sctest {
 		
 		long time = System.currentTimeMillis();
 		
-		String keyWord1 = args[0];
-		String keyWord2 = args[1];
+		keyWord1 = args[0];
+		keyWord2 = args[1];
 		testFileName = args[2];
 		modelFileName = args[3];
 		answerFileName = args[4];
 		
 		answers = new ArrayList<String>();
 		
-		model1 = new Model(keyWord1);
-		model2 = new Model(keyWord2);
+		model = new TrainingModel();
 		
 		// read from model file
 		ArrayList<String> modelLines = FileReaderWriter.readFromFile(modelFileName);
@@ -61,22 +61,18 @@ public class sctest {
 	
 	private static void parseModelSentences(ArrayList<String> lines) {
 		try {
-			Model model = null;
+
 			for(String line : lines) {
 				String[] splits = line.split(" ");
 				String split = splits[0];
 				
-				if(split.contains(Model.KEYWORD)) {
-					model = getModel(splits[1]);
+				double weight = Double.parseDouble(splits[1]);
+				
+				if(split.contains(",")) { // collocation
+					String[] words = split.split(",");
+					model.addCollocation(words[0], words[1], weight);
 				} else {
-					double weight = Double.parseDouble(splits[1]);
-					
-					if(split.contains(",")) { // collocation
-						String[] words = split.split(",");
-						model.addCollocation(words[0], words[1], weight);
-					} else {
-						model.addWord(split, weight);
-					}
+					model.addWord(split, weight);
 				}
 				
 			}
@@ -163,28 +159,24 @@ public class sctest {
 	private static String getKeyWord(Sentence sentence, String id) throws Exception {
 		String keyword = "";
 		
-		double value1 = getModelLogisticRegression(model1, sentence);
-		double value2 = getModelLogisticRegression(model2, sentence);
+		double value = getModelLogisticRegression(model, sentence);
 		
-		double approxValModel1 = Math.abs((double)Sentence.FIRST_WORD_OUTPUT - value1);
-		double approxValModel2 = Math.abs((double)Sentence.SECOND_WORD_OUTPUT - value2);
-		
-		if(approxValModel1 > approxValModel2) {
-			keyword = model1.getKeyWord();
-		} else if(approxValModel2 > approxValModel1) {
-			keyword = model2.getKeyWord();
+		if(value > 0.5) {
+			keyword = keyWord1;
+		} else if(value < 0.5) {
+			keyword = keyWord2;
 		} else {
-			keyword = model1.getKeyWord();
+			keyword = "Cannot find which confusable word to choose";
 		}
 		
 		return keyword;
 	}
 	
-	private static double getModelLogisticRegression(Model model, Sentence sentence) throws Exception {
+	private static double getModelLogisticRegression(TrainingModel model, Sentence sentence) throws Exception {
 		return sigmoid(getLinearRegression(model, sentence));
 	}
 	
-	private static double getLinearRegression(Model model, Sentence sentence) throws Exception {
+	private static double getLinearRegression(TrainingModel model, Sentence sentence) throws Exception {
 		double sum = 0.0f;
 		
 		HashMap<String, Integer> words = sentence.getWords();
@@ -204,25 +196,13 @@ public class sctest {
 	}
 	
 	private static double sigmoid(double z) {
-		return 1/(1+Math.exp(z));
+		return 1/(1+Math.exp(-z));
 	}
 	
 	/*
 	 * Helper methods
 	 * */
 	
-	private static Model getModel(String keyWord) throws Exception{
-		String keyword1 = model1.getKeyWord();
-		String keyword2 = model2.getKeyWord();
-		
-		if(keyword1.equals(keyWord))
-			return model1;
-		else if(keyword2.equals(keyWord))
-			return model2;
-		else
-			throw new Exception("Keyword " + keyWord + " are not amongst the key words: " + 
-					keyword1 + ", " + keyword2);
-	}
 	
 	private static int getKeyWordIndex(String[] words, String keyWord) throws Exception {
 		for(int index=0; index<words.length; index++) {

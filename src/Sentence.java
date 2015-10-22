@@ -8,7 +8,6 @@ public class Sentence {
 	protected static final int SECOND_WORD_OUTPUT = 1 - FIRST_WORD_OUTPUT;
 	
 	private int output;
-	private String keyword;
 	private HashMap<String, Integer> words;
 	private HashMap<Collocation, Integer> collocations;
 	
@@ -32,13 +31,8 @@ public class Sentence {
 		return this.output;
 	}
 	
-	public void setOutput(String keyword, int output) {
-		this.keyword = keyword;
+	public void setOutput(int output) {
 		this.output = output;
-	}
-	
-	public String getKeyword() {
-		return this.keyword;
 	}
 	
 	public HashMap<String, Integer> getWords() {

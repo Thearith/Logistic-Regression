@@ -4,12 +4,13 @@ import java.util.Set;
 
 public class sctrain {
 	
-	private static final int COLLOCATION_RANGE = 5;
-	private static final int NUM_ITERATIONS = 100000; 
+	private static final int COLLOCATION_RANGE = 3;
+	private static final int NUM_ITERATIONS = 10000; 
 	private static final double LEARNING_RATE = 1/(double) NUM_ITERATIONS;
 	
-	private static Model model1;
-	private static Model model2;
+	private static TrainingModel model;
+	private static String keyWord1;
+	private static String keyWord2;
 	private static String trainFileName;
 	private static String modelFileName;
 	
@@ -24,13 +25,12 @@ public class sctrain {
 		
 		long time = System.currentTimeMillis();
 		
-		String keyWord1 = args[0];
-		String keyWord2 = args[1];
+		keyWord1 = args[0];
+		keyWord2 = args[1];
 		trainFileName = args[2];
 		modelFileName = args[3];
 		
-		model1 = new Model(keyWord1);
-		model2 = new Model(keyWord2);
+		model = new TrainingModel();
 		
 		sentences = new ArrayList<Sentence>();
 
@@ -45,8 +45,7 @@ public class sctrain {
 		System.out.println("This program takes " + (System.currentTimeMillis() - time) + " milliseconds");
 		
 		// write models to text files
-		ArrayList<String> modelLogs = model1.getModelLogs();
-		modelLogs.addAll(model2.getModelLogs());
+		ArrayList<String> modelLogs = model.getModelLogs();
 		FileReaderWriter.writeToFile(modelFileName, modelLogs);
 		
 		for(String log : modelLogs)
@@ -61,7 +60,6 @@ public class sctrain {
 	
 	private static void parseSentences(ArrayList<String> lines, ArrayList<String> stopWords) {
 		try {
-			int index = 0;
 			for(String line : lines) {
 				parseSentence(line, stopWords);
 			}
@@ -87,16 +85,14 @@ public class sctrain {
 		int end = parsedLine.indexOf("<<");
 		String keyword = parsedLine.substring(start+2, end); // exclude << and >>
 		keyword = keyword.replaceAll(" ", "").toLowerCase();
-		sentence.setOutput(keyword, getKeywordOutput(keyword));
+		sentence.setOutput(getKeywordOutput(keyword));
 		
 		// extract every word except punctuation 
-		Model model = getModel(keyword);
 		String[] words = parsedLine.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
 		
 		// surrounding words
 		for(String word : words) {
 			if(!word.equals("") && !word.equals(keyword) && !isStopWord(stopWords, word)) {
-				model.addWord(word);
 				sentence.addWord(word);
 			}
 		}
@@ -116,7 +112,6 @@ public class sctrain {
 			String word2 = words[pos+1];
 			if(!word1.equals("") && !word1.equals(keyword) && !isStopWord(stopWords, word1) &&
 					!word2.equals("") && !word2.equals(keyword) && !isStopWord(stopWords, word2)) {
-				model.addCollocation(word1, word2);
 				sentence.addCollocation(word1, word2);
 			}
 		}
@@ -136,7 +131,6 @@ public class sctrain {
 				for(Sentence sentence : sentences) {
 					double logisticRegressionVal = getLogisticRegression(sentence);
 					double expectedOutput = sentence.getOutput();
-					Model model = getModel(sentence.getKeyword());
 					
 					HashMap<String, Integer> words = sentence.getWords();
 					Set<String> wordSet = words.keySet();
@@ -168,8 +162,6 @@ public class sctrain {
 	}
 	
 	private static double getLinearRegression(Sentence sentence) throws Exception {
-		String keyword = sentence.getKeyword();
-		Model model = getModel(keyword);
 		double sum = 0.0f;
 		
 		HashMap<String, Integer> words = sentence.getWords();
@@ -197,30 +189,14 @@ public class sctrain {
 	 * Helper methods
 	 * */
 	
-	private static Model getModel(String keyWord) throws Exception{
-		String keyword1 = model1.getKeyWord();
-		String keyword2 = model2.getKeyWord();
-		
-		if(keyword1.equals(keyWord))
-			return model1;
-		else if(keyword2.equals(keyWord))
-			return model2;
-		else
-			throw new Exception("Keyword " + keyWord + " are not amongst the key words: " + 
-					keyword1 + ", " + keyword2);
-	}
-	
 	private static int getKeywordOutput(String keyWord) throws Exception {
-		String keyword1 = model1.getKeyWord();
-		String keyword2 = model2.getKeyWord();
-		
-		if(keyword1.equals(keyWord))
+		if(keyWord1.equals(keyWord))
 			return Sentence.FIRST_WORD_OUTPUT;
-		else if(keyword2.equals(keyWord))
+		else if(keyWord2.equals(keyWord))
 			return Sentence.SECOND_WORD_OUTPUT;
 		else
 			throw new Exception("Keyword " + keyWord + " are not amongst the key words: " + 
-					keyword1 + ", " + keyword2);
+					keyWord1 + ", " + keyWord2);
 	}
 	
 	private static int getKeyWordIndex(String[] words, String keyWord) throws Exception {

@@ -5,26 +5,16 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class Model {
+public class TrainingModel {
 	
 	protected static final String KEYWORD = "Keyword";
 	
-	private String keyWord;
 	private HashMap<String, Double> surroundingWords;
 	private HashMap<Collocation, Double> collocations;
 	
-	public Model(String keyword) {
-		setKeyWord(keyword);
+	public TrainingModel() {
 		surroundingWords = new HashMap<String, Double>();
 		collocations = new HashMap<Collocation, Double>();
-	}
-	
-	public void setKeyWord(String keyWord) {
-		this.keyWord = keyWord;
-	}
-	
-	public String getKeyWord() {
-		return this.keyWord;
 	}
 	
 	
@@ -95,7 +85,7 @@ public class Model {
 	 * */
 	
 	private double getRandomizedWeight() {
-		return Math.random();
+		return 0;
 	}
 	
 	public void printModel() {
@@ -107,8 +97,7 @@ public class Model {
 	public ArrayList<String> getModelLogs() {
 		ArrayList<String> logs = new ArrayList<String>(); 
 		
-		String log = KEYWORD + " " + keyWord;
-		logs.add(log);
+		String log = "";
 		
 		Set<String> wordSet = surroundingWords.keySet();
 		for(String word : wordSet) {
