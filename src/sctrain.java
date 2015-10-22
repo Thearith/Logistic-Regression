@@ -93,6 +93,7 @@ public class sctrain {
 		// surrounding words
 		for(String word : words) {
 			if(!word.equals("") && !word.equals(keyword) && !isStopWord(stopWords, word)) {
+				model.addWord(word);
 				sentence.addWord(word);
 			}
 		}
@@ -110,8 +111,9 @@ public class sctrain {
 			
 			String word1 = words[pos];
 			String word2 = words[pos+1];
-			if(!word1.equals("") && !word1.equals(keyword) && !isStopWord(stopWords, word1) &&
-					!word2.equals("") && !word2.equals(keyword) && !isStopWord(stopWords, word2)) {
+			if(!word1.equals("") && !word1.equals(keyword) &&
+					!word2.equals("") && !word2.equals(keyword)) {
+				model.addCollocation(word1, word2);
 				sentence.addCollocation(word1, word2);
 			}
 		}

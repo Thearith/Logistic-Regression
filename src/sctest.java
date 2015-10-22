@@ -140,8 +140,8 @@ public class sctest {
 			
 			String word1 = words[pos];
 			String word2 = words[pos+1];
-			if(!word1.equals("") && !word1.equals(TEST_KEYWORD) && !isStopWord(stopWords, word1) &&
-					!word2.equals("") && !word2.equals(TEST_KEYWORD) && !isStopWord(stopWords, word2)) {
+			if(!word1.equals("") && !word1.equals(TEST_KEYWORD) &&
+					!word2.equals("") && !word2.equals(TEST_KEYWORD)) {
 				sentence.addCollocation(word1, word2);
 			}
 		}
@@ -161,9 +161,9 @@ public class sctest {
 		
 		double value = getModelLogisticRegression(model, sentence);
 		
-		if(value > 0.5) {
+		if(value > 0.5) { // closer to 1 -- first confusable word
 			keyword = keyWord1;
-		} else if(value < 0.5) {
+		} else if(value < 0.5) { // closer to 0 -- second confusable word
 			keyword = keyWord2;
 		} else {
 			keyword = "Cannot find which confusable word to choose";
@@ -173,7 +173,8 @@ public class sctest {
 	}
 	
 	private static double getModelLogisticRegression(TrainingModel model, Sentence sentence) throws Exception {
-		return sigmoid(getLinearRegression(model, sentence));
+		double value = getLinearRegression(model, sentence);
+		return sigmoid(value);
 	}
 	
 	private static double getLinearRegression(TrainingModel model, Sentence sentence) throws Exception {

@@ -37,7 +37,7 @@ public class TrainingModel {
 	
 	public double getWordWeight(String word) {
 		return surroundingWords.containsKey(word) ? 
-				surroundingWords.get(word) : getRandomizedWeight();
+				surroundingWords.get(word) : getInitialWeight();
 	}
 	
 	public double getWordWeight(String word, double defaultValue) {
@@ -71,7 +71,7 @@ public class TrainingModel {
 	
 	public double getCollocationWeight(Collocation collocation) {
 		return collocations.containsKey(collocation) ?
-				collocations.get(collocation) : getRandomizedWeight();
+				collocations.get(collocation) : getInitialWeight();
 	}
 	
 	public double getCollocationWeight(Collocation collocation, double defaultValue) {
@@ -84,7 +84,7 @@ public class TrainingModel {
 	 * Helper function
 	 * */
 	
-	private double getRandomizedWeight() {
+	private double getInitialWeight() {
 		return 0;
 	}
 	
