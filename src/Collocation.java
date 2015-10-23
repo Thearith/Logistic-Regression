@@ -1,3 +1,8 @@
+/*********************************************************************
+ * Name: Sothearith Sreang
+ * Matric No: A0106044W
+ * Program: Context-sensitive spelling correction
+ *********************************************************************/
 
 public class Collocation {
 

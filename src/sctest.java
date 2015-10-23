@@ -1,3 +1,10 @@
+/*********************************************************************
+ * Name: Sothearith Sreang
+ * Matric No: A0106044W
+ * Program: Context-sensitive spelling correction
+ *********************************************************************/
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;

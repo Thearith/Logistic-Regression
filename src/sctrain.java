@@ -1,3 +1,10 @@
+/*********************************************************************
+ * Name: Sothearith Sreang
+ * Matric No: A0106044W
+ * Program: Context-sensitive spelling correction
+ *********************************************************************/
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -34,7 +41,7 @@ public class sctrain {
 		
 		sentences = new ArrayList<Sentence>();
 
-		// parse words and store inputs in sentences
+		// parse words and store inputs in "sentences"
 		ArrayList<String> lines = FileReaderWriter.readFromFile(trainFileName);
 		ArrayList<String> stopWords = FileReaderWriter.readFromStopWordFile();
 		parseSentences(lines, stopWords);
@@ -48,14 +55,12 @@ public class sctrain {
 		ArrayList<String> modelLogs = model.getModelLogs();
 		FileReaderWriter.writeToFile(modelFileName, modelLogs);
 		
-		for(String log : modelLogs)
-			System.out.println(log);
-		
+		// model.printModel();
 	}
 	
 	
 	/*
-	 * Parse sentence into words and collocations and store them in "sentences" and "model1" or "model2"
+	 * Parse sentence into words and collocations and store them in "sentences" and "model"
 	 * */
 	
 	private static void parseSentences(ArrayList<String> lines, ArrayList<String> stopWords) {
@@ -85,12 +90,12 @@ public class sctrain {
 		int end = parsedLine.indexOf("<<");
 		String keyword = parsedLine.substring(start+2, end); // exclude << and >>
 		keyword = keyword.replaceAll(" ", "").toLowerCase();
-		sentence.setOutput(getKeywordOutput(keyword));
+		sentence.setExpectedOutput(getExpectedOutputFromKeyword(keyword));
 		
 		// extract every word except punctuation 
 		String[] words = parsedLine.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
 		
-		// surrounding words
+		// Feature : surrounding words
 		for(String word : words) {
 			if(!word.equals("") && !word.equals(keyword) && !isStopWord(stopWords, word)) {
 				model.addWord(word);
@@ -98,7 +103,7 @@ public class sctrain {
 			}
 		}
 		
-		// Collocations
+		// Feature : Collocations
 		int keyWordIndex = getKeyWordIndex(words, keyword);
 		
 		for(int relativePos = -COLLOCATION_RANGE; relativePos<=COLLOCATION_RANGE-1; relativePos++) {
@@ -129,10 +134,13 @@ public class sctrain {
 	private static void trainModel() {
 		try{
 			for(int iteration = 0; iteration < NUM_ITERATIONS; iteration++) {
-				System.out.println("Processing iteration " + iteration);
+				
+				if(iteration % 1000 == 0)
+					System.out.println("Processing iteration " + iteration);
+				
 				for(Sentence sentence : sentences) {
 					double logisticRegressionVal = getLogisticRegression(sentence);
-					double expectedOutput = sentence.getOutput();
+					double expectedOutput = sentence.getExpectedOutput();
 					
 					HashMap<String, Integer> words = sentence.getWords();
 					Set<String> wordSet = words.keySet();
@@ -191,7 +199,7 @@ public class sctrain {
 	 * Helper methods
 	 * */
 	
-	private static int getKeywordOutput(String keyWord) throws Exception {
+	private static int getExpectedOutputFromKeyword(String keyWord) throws Exception {
 		if(keyWord1.equals(keyWord))
 			return Sentence.FIRST_WORD_OUTPUT;
 		else if(keyWord2.equals(keyWord))

@@ -1,6 +1,11 @@
-import java.util.HashMap;
-import java.util.Set;
+/*********************************************************************
+ * Name: Sothearith Sreang
+ * Matric No: A0106044W
+ * Program: Context-sensitive spelling correction
+ *********************************************************************/
 
+
+import java.util.HashMap;
 
 public class Sentence {
 
@@ -27,11 +32,11 @@ public class Sentence {
 	 * getters and setters
 	 * */
 	
-	public int getOutput() {
+	public int getExpectedOutput() {
 		return this.output;
 	}
 	
-	public void setOutput(int output) {
+	public void setExpectedOutput(int output) {
 		this.output = output;
 	}
 	
